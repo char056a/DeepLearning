@@ -1,25 +1,22 @@
 import numpy as np 
 
 # Mean square error 
-
 def MSE(output, target):
-    
     return np.sum((target-output)**2/len(target))
 
-# Softmax 
-
+# Softmax
 def softmax(output):
-
     return (np.exp(output))/np.sum(np.exp(output))
 
 # Cross-entropy (only for one training example)
-
 def cross_entropy_single(correct_onehot, network_output):
-
     S = softmax(network_output)
     S = np.sum(S * correct_onehot)
     S = -np.log(S)
     return S 
+
+def softmax_matrix(output):
+    return np.exp(output)/np.sum(np.exp(output), axis=0)
 
 # Test
 print("MSE:")
