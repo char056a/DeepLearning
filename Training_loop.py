@@ -8,6 +8,9 @@ from Loss import cross_entropy_batch
 
 import wandb
 
+# L2
+# Parameter histograms and gradient norms
+
 # Compute accuracy for a batch
 def accuracy(Y_true, logits):
     # logits = network output before softmax
@@ -104,7 +107,7 @@ def main():
                 batch_loss = cross_entropy_batch(Y_batch, Z_batch[-1])
                 batch_acc = accuracy(Y_batch, outputs_batch)
 
-                # Accumulate for epoch metrics (weighted by batch size)
+                # Accumulate for epoch metrics 
                 epoch_loss_sum += batch_loss * bs
                 epoch_correct_sum += batch_acc * bs
                 epoch_samples += bs
