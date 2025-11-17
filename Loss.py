@@ -12,7 +12,7 @@ def softmax(output):
 def cross_entropy_single(correct_onehot, network_output):
     S = softmax(network_output)
     S = np.sum(S * correct_onehot)
-    S = -np.log(S)
+    S = -np.log(S + 1e-12)
     return S 
 
 # Softmax for a batch 
@@ -20,6 +20,13 @@ def softmax_matrix(output):
     shifted = output - np.max(output, axis=0, keepdims=True) 
     exp_vals = np.exp(shifted) 
     return exp_vals / np.sum(exp_vals, axis=0, keepdims=True)
+
+# Cross-entropy for a batch
+def cross_entropy_batch(correct_onehot, network_output):
+    S = softmax_matrix(network_output)
+    S = np.sum(S * correct_onehot, axis=0)
+    S = -np.log(S + 1e-12)
+    return np.mean(S) # mean over the whole batch
 
 # Test
 print("MSE:")
