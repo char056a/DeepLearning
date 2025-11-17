@@ -64,3 +64,17 @@ def cifar10(flatten=True, one_hot=False):
 
     return (Xtr, ytr), (Xte, yte)
 
+
+# til at lave validation set
+def train_val_split(X, y, val_size, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
+    N = len(X)
+    perm = np.random.permutation(N)
+    X_sh = X[perm]
+    y_sh = y[perm]
+    X_val = X_sh[:val_size]
+    y_val = y_sh[:val_size]
+    X_train = X_sh[val_size:]
+    y_train = y_sh[val_size:]
+    return X_train, y_train, X_val, y_val
