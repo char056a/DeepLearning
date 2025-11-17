@@ -34,8 +34,8 @@ def main():
 
     # Define hyperparameters that we want to track
     config = {
-        "epochs": 10,
-        "learning_rate": 0.0005,
+        "epochs": 25,
+        "learning_rate": 0.001,
         "batch_size": 64, 
         "hidden_sizes": [128, 64],
         "activation": "Relu",
