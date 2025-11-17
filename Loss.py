@@ -4,7 +4,7 @@ import numpy as np
 def MSE(output, target):
     return np.sum((target-output)**2/len(target))
 
-# Softmax
+# Softmax for a single vector
 def softmax(output):
     return (np.exp(output))/np.sum(np.exp(output))
 
@@ -15,8 +15,11 @@ def cross_entropy_single(correct_onehot, network_output):
     S = -np.log(S)
     return S 
 
+# Softmax for a batch 
 def softmax_matrix(output):
-    return np.exp(output)/np.sum(np.exp(output), axis=0)
+    shifted = output - np.max(output, axis=0, keepdims=True) 
+    exp_vals = np.exp(shifted) 
+    return exp_vals / np.sum(exp_vals, axis=0, keepdims=True)
 
 # Test
 print("MSE:")
@@ -25,7 +28,10 @@ print("Softmax:")
 print(softmax(np.array([1,2,20,3,4])))
 print("Cross:")
 print(cross_entropy_single(np.array([0,0,1,0,0]),[1,2,20,3,4]))
-
+print("Softmax_matrix: small numbers")
+print(softmax_matrix(np.array([1, 2, 3]))) 
+print("Softmax_matrix: large numbers") 
+print(softmax_matrix(np.array([1000, 1001, 999]))) 
 
 
 
