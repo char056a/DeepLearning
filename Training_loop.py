@@ -16,6 +16,17 @@ def accuracy(Y_true, logits):
     targets = np.argmax(Y_true, axis=0)
     return np.mean(preds == targets)
 
+# Compute confusion matrix on a full dataset 
+def confusion_matrix(Y_true, logits, num_classes):
+    preds = np.argmax(logits, axis=0)
+    targets = np.argmax(Y_true, axis=0)
+
+    cm = np.zeros((num_classes, num_classes), dtype=int)
+    for t, p in zip(targets, preds):
+        cm[t, p] += 1
+
+    return cm, targets, preds
+
 # Entry point for training the model
 def main():
     # Log in to WandB
@@ -24,7 +35,8 @@ def main():
     # Define hyperparameters that we want to track
     config = {
         "epochs": 10,
-        "learning_rate": 0.01,
+        "learning_rate": 0.0005,
+        "batch_size": 64, 
         "hidden_sizes": [128, 64],
         "activation": "Relu",
         "init": "xavier_uniform",
@@ -58,37 +70,79 @@ def main():
         Y_test_T = Y_test.T
 
         lr = cfg.learning_rate
+        batch_size = cfg.batch_size
+        N_train = X_train_T.shape[1]
 
+        # Class names (for confusion matrix plot in WandB)
+        FASHION_MNIST_CLASSES = [
+            "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
+            "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
+        ]
+        
         # Training loop
         for epoch in range(cfg.epochs):
-            # Forward pass on full training set
-            outputs_train, A_train, Z_train = model.forward(X_train_T)
+            epoch_loss_sum = 0.0
+            epoch_correct_sum = 0
+            epoch_samples = 0
 
-            # Compute training loss
-            train_loss = cross_entropy_batch(Y_train_T, Z_train[-1])
+            # Shuffle indices
+            indices = np.random.permutation(N_train)
 
-            # Compute accuracy
-            train_acc = accuracy(Y_train_T, outputs_train)
+            for start in range(0, N_train, batch_size):
+                end = min(start + batch_size, N_train)
+                batch_idx = indices[start:end]
+                bs = end - start # batch size
 
-            # Backprop: Compute gradients
-            grads_w, grads_b = model.full_gradient(
-                A_train,    # activations of each layer
-                Z_train,    # logits of each layer
-                Y_train_T,  # one-hot labels
-                X_train_T   # input data
-            )
+                # Mini-batch data
+                X_batch = X_train_T[:, batch_idx]
+                Y_batch = Y_train_T[:, batch_idx]
 
-            # Gradient descent update 
-            for layer, dW, dB in zip(model.layers, grads_w, grads_b):
-                layer.weights -= lr * dW
-                layer.bias -= lr * dB
+                # Forward pass on this batch
+                outputs_batch, A_batch, Z_batch = model.forward(X_batch)
 
-            # Evaluate on test set
+                # Loss and accuracy for this batch
+                batch_loss = cross_entropy_batch(Y_batch, Z_batch[-1])
+                batch_acc = accuracy(Y_batch, outputs_batch)
+
+                # Accumulate for epoch metrics (weighted by batch size)
+                epoch_loss_sum += batch_loss * bs
+                epoch_correct_sum += batch_acc * bs
+                epoch_samples += bs
+
+                # Backprop for this batch
+                grads_w, grads_b = model.full_gradient(
+                    A_batch,
+                    Z_batch,
+                    Y_batch,
+                    X_batch
+                )
+
+                # Gradient descent update
+                for layer, dW, dB in zip(model.layers, grads_w, grads_b):
+                    layer.weights -= lr * dW
+                    layer.bias -= lr * dB
+
+            # Epoch-level training metrics
+            train_loss = epoch_loss_sum / epoch_samples
+            train_acc = epoch_correct_sum / epoch_samples
+
+            # Evaluation on test set
             outputs_test, _, Z_test = model.forward(X_test_T)
             test_loss = cross_entropy_batch(Y_test_T, Z_test[-1])
             test_acc = accuracy(Y_test_T, outputs_test)
 
-            # Log metrics to WandB
+            # Confusion matrix on test set 
+            cm, y_true_labels, y_pred_labels = confusion_matrix(
+            Y_test_T, outputs_test, num_classes=output_size
+            )
+
+            print(
+            f"Epoch {epoch+1}/{cfg.epochs} | "
+            f"train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, "
+            f"test_loss: {test_loss:.4f}, test_acc: {test_acc:.4f}"
+            )
+
+            # Log to WandB
             wandb.log({
                 "epoch": epoch,
                 "train_loss": train_loss,
@@ -96,6 +150,12 @@ def main():
                 "test_loss": test_loss,
                 "test_accuracy": test_acc,
                 "learning_rate": lr,
+                "batch_size": batch_size,
+                "confusion_matrix": wandb.plot.confusion_matrix(
+                    y_true=y_true_labels,
+                    preds=y_pred_labels,
+                    class_names=FASHION_MNIST_CLASSES
+                )
             })
 
 if __name__ == "__main__":
