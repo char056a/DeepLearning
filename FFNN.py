@@ -31,6 +31,7 @@ class Layer:
 class FFNN:
 
     def __init__(self,input_size,hidden_sizes,output_size, init_fn,act_fn):
+        self.act_fn=act_fn
         self.layers=[]
         self.layers.append(Layer(dim_in=input_size,dim_out=hidden_sizes[0],init_fn=init_fn,act_fn=act_fn))
         for i in range(1,len(hidden_sizes)):
@@ -59,7 +60,7 @@ class FFNN:
         gradients_w.insert(0,np.sum(dLi_dW,axis=0))
         gradients_b.insert(0,np.sum(dLi_dB,axis=1))
         for i in range(len(self.layers)-2,0,-1):
-            dLi_df=((self.layers[i+1].weights.T@dLi_df)*(Z[i]>0)) #
+            dLi_df=((self.layers[i+1].weights.T@dLi_df)*(self.act_fn(Z[i],derivative=True))) #
             dLi_dB=dLi_df #
             dLi_dW=np.einsum('ij,sj->jis',dLi_df,A[i-1]) # instead of dLi_dW=np.outer(dLi_df,A[i-1])
             gradients_w.insert(0,np.sum(dLi_dW,axis=0))
