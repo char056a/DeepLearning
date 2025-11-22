@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/zhome/64/e/180519/DeepLearning/train_02.py", line 138, in <module>
-    main()
-  File "/zhome/64/e/180519/DeepLearning/train_02.py", line 100, in main
-    loss = cross_entropy_batch(logits, y_batch_oh)
-  File "/zhome/64/e/180519/DeepLearning/Loss.py", line 27, in cross_entropy_batch
-    S = np.sum(S * correct_onehot, axis=0)
-ValueError: operands could not be broadcast together with shapes (64,10) (10,64)
