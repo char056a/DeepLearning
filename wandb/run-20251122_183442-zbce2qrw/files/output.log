@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/train_02.py", line 138, in <module>
+    main()
+  File "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/train_02.py", line 66, in main
+    (Xtr, ytr), (Xte, yte) = FASHION_MNIST(flatten=True, one_hot=False)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/Data_loading.py", line 12, in FASHION_MNIST
+    Xtr = np.frombuffer(get("train-images-idx3-ubyte.gz"), dtype=np.uint8, offset=16).reshape(-1, 28, 28) / 255.0
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/Data_loading.py", line 10, in <lambda>
+    get  = lambda name: gzip.decompress(urllib.request.urlopen(base+name).read())
+                        ^^^^
+NameError: name 'gzip' is not defined. Did you mean: 'zip'? Or did you forget to import 'gzip'

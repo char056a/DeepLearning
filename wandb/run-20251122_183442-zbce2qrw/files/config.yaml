@@ -1,0 +1,44 @@
+_wandb:
+    value:
+        cli_version: 0.23.0
+        e:
+            xww8j3fp2bz0td1hoywgpul68hfep0rf:
+                codePath: train_02.py
+                codePathLocal: train_02.py
+                email: mahmoudseddiga@gmail.com
+                executable: /opt/anaconda3/bin/python
+                git:
+                    commit: aa4074733a923d3b42d4c341cfa7f356f226a940
+                    remote: https://github.com/char056a/DeepLearning.git
+                host: airtilheseddiga.students.clients.local
+                os: macOS-14.5-arm64-arm-64bit
+                program: /Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/train_02.py
+                python: CPython 3.12.4
+                root: /Users/seddigamahmoud/Documents/Deep Learning/DeepLearning
+                startedAt: "2025-11-22T17:34:42.595790Z"
+                writerId: xww8j3fp2bz0td1hoywgpul68hfep0rf
+        m: []
+        python_version: 3.12.4
+        t:
+            "3":
+                - 16
+            "4": 3.12.4
+            "5": 0.23.0
+            "12": 0.23.0
+            "13": darwin-arm64
+activation:
+    value: Relu
+batch_size:
+    value: 64
+dataset:
+    value: Fashion-MNIST
+epochs:
+    value: 25
+hidden_sizes:
+    value:
+        - 128
+        - 64
+init:
+    value: xavier_uniform
+learning_rate:
+    value: 0.001

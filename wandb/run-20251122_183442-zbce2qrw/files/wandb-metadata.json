@@ -1,0 +1,17 @@
+{
+  "os": "macOS-14.5-arm64-arm-64bit",
+  "python": "CPython 3.12.4",
+  "startedAt": "2025-11-22T17:34:42.595790Z",
+  "program": "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning/train_02.py",
+  "codePath": "train_02.py",
+  "codePathLocal": "train_02.py",
+  "git": {
+    "remote": "https://github.com/char056a/DeepLearning.git",
+    "commit": "aa4074733a923d3b42d4c341cfa7f356f226a940"
+  },
+  "email": "mahmoudseddiga@gmail.com",
+  "root": "/Users/seddigamahmoud/Documents/Deep Learning/DeepLearning",
+  "host": "airtilheseddiga.students.clients.local",
+  "executable": "/opt/anaconda3/bin/python",
+  "writerId": "xww8j3fp2bz0td1hoywgpul68hfep0rf"
+}
