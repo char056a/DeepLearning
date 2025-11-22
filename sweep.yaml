@@ -3,15 +3,14 @@ method: grid
 
 parameters:
   epochs:
-    values: [20, 25]
+    values: [5, 10]
   learning_rate:
-    values: [0.001, 0.0005]
+    values: [0.001]
   batch_size:
     values: [64, 128]
   hidden_sizes:
     values:
-      - [128, 64]
-      - [256, 128]
+      - [64, 32]
 
   activation:
     values: ["Relu", "tanh"]

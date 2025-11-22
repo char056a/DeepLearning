@@ -105,9 +105,7 @@ def main():
 
             grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch)
 
-            for layer, dW, dB in zip(net.layers, grads_w, grads_b):
-                layer.weights -= lr * dW
-                layer.bias    -= lr * dB
+            net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
 
         epoch_train_loss /= num_batches
 
