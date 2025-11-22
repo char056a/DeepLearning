@@ -1,0 +1,24 @@
+program: train.py
+method: grid
+
+parameters:
+  epochs:
+    values: [20, 25]
+  learning_rate:
+    values: [0.001, 0.0005]
+  batch_size:
+    values: [64, 128]
+  hidden_sizes:
+    values:
+      - [128, 64]
+      - [256, 128]
+
+  activation:
+    values: ["Relu", "tanh"]
+
+  init:
+    values: ["he_normal", "he_uniform", "xavier_normal", "xavier_uniform"]
+
+  dataset:
+    values: ["Fashion-MNIST"]
+
