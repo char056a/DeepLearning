@@ -22,11 +22,12 @@ ACT_FNS = {
 }
 
 
-def to_one_hot(y, num_classes=10):
-    oh = np.zeros((y.size, num_classes))
-    oh[np.arange(y.size), y] = 1.0
-    return oh
 
+def to_one_hot(y, num_classes=10):
+    # returns (num_classes, batch_size)
+    oh = np.zeros((num_classes, y.size))
+    oh[y, np.arange(y.size)] = 1.0
+    return oh
 
 def accuracy(logits, y_true):
     preds = np.argmax(logits, axis=0)
@@ -97,7 +98,7 @@ def main():
             y_batch_oh = to_one_hot(y_batch, output_size)
 
             logits, A, Z = net.forward(X_batch)
-            loss = cross_entropy_batch(logits, y_batch_oh)
+            loss = cross_entropy_batch(y_batch_oh, logits)
 
             epoch_train_loss += loss
             num_batches += 1
@@ -117,8 +118,8 @@ def main():
         train_oh = to_one_hot(y_train, output_size)
         val_oh   = to_one_hot(y_val,   output_size)
 
-        train_loss = cross_entropy_batch(train_logits, train_oh)
-        val_loss   = cross_entropy_batch(val_logits, val_oh)
+        train_loss = cross_entropy_batch(train_oh, train_logits)
+        val_loss   = cross_entropy_batch(val_oh,   val_logits)
 
         train_acc = accuracy(train_logits, y_train)
         val_acc   = accuracy(val_logits, y_val)
