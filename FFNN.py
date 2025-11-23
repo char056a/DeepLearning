@@ -84,7 +84,7 @@ class FFNN:
 
         return gradients_w, gradients_b
 
-    
+    fo
     def update_wb(self, gradients_w, gradients_b, learning_rate, Adam=False):
         if Adam:
             self.t += 1
