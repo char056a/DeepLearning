@@ -59,25 +59,31 @@ class FFNN:
             output=a
         return output,A,Z
     
-    def full_gradient(self,A,Z,onehot,input):
-        gradients_w=[]
-        gradients_b=[]
-        dLi_dW,dLi_dB=self.layers[-1].gradient_last(onehot,A,Z)
-        dLi_df=dLi_dB
-        gradients_w.insert(0,np.sum(dLi_dW,axis=0))
-        gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        for i in range(len(self.layers)-2,0,-1):
-            dLi_df=((self.layers[i+1].weights.T@dLi_df)*(Z[i]>0)) #
-            dLi_dB=dLi_df #
-            dLi_dW=np.einsum('ij,sj->jis',dLi_df,A[i-1]) # instead of dLi_dW=np.outer(dLi_df,A[i-1])
-            gradients_w.insert(0,np.sum(dLi_dW,axis=0))
-            gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        dLi_df=((self.layers[1].weights.T@dLi_df)*(Z[0]>0)) #
-        dLi_dB=dLi_df
-        dLi_dW=np.einsum('ij,sj->jis',dLi_df,input)# instead of dLi_dW=np.outer(dLi_df,input)
-        gradients_w.insert(0,np.sum(dLi_dW,axis=0))
-        gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        return gradients_w,gradients_b
+        def full_gradient(self, A, Z, onehot, input):
+        gradients_w = []
+        gradients_b = []
+        dLi_dW, dLi_dB = self.layers[-1].gradient_last(onehot, A, Z)
+        dLi_df = dLi_dB                   
+        gradients_w.insert(0, np.sum(dLi_dW, axis=0))
+        gradients_b.insert(0, np.sum(dLi_dB, axis=1))
+
+        for i in range(len(self.layers) - 2, 0, -1):
+            d_act = self.layers[i].act_fn(Z[i], derivative=True)
+            dLi_df = (self.layers[i + 1].weights.T @ dLi_df) * d_act
+            dLi_dB = dLi_df
+            dLi_dW = np.einsum('ij,sj->jis', dLi_df, A[i - 1])
+            gradients_w.insert(0, np.sum(dLi_dW, axis=0))
+            gradients_b.insert(0, np.sum(dLi_dB, axis=1))
+
+        d_act0 = self.layers[0].act_fn(Z[0], derivative=True)
+        dLi_df = (self.layers[1].weights.T @ dLi_df) * d_act0
+        dLi_dB = dLi_df
+        dLi_dW = np.einsum('ij,sj->jis', dLi_df, input)
+        gradients_w.insert(0, np.sum(dLi_dW, axis=0))
+        gradients_b.insert(0, np.sum(dLi_dB, axis=1))
+
+        return gradients_w, gradients_b
+
     
     def update_wb(self, gradients_w, gradients_b, learning_rate, Adam=False):
         if Adam:

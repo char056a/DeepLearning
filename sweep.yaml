@@ -7,8 +7,8 @@ metric:
 
 parameters:
   learning_rate:
-    min: 0.00025
-    max: 0.003
+    min: 0.0007
+    max: 0.0015
     distribution: uniform
 
   batch_size:
@@ -17,16 +17,16 @@ parameters:
     distribution: int_uniform
 
   epochs:
-    min: 10
-    max: 40
+    min: 20
+    max: 80
     distribution: int_uniform
 
   hidden_sizes:
-    values:
-      - [64, 32]
-      - [128, 64]
-      - [256, 128]
-      - [256, 256, 128]
+  values:
+    - [512, 256]
+    - [512, 512, 256]
+    - [1024, 512, 256]
+
 
   activation:
     values:
@@ -40,16 +40,17 @@ parameters:
       - xavier_normal
       - xavier_uniform
 
+
   dataset:
     values:
       - Fashion-MNIST
 
   beta:
-    min: 0.8          # around your default 0.9
+    min: 0.8          # around default 0.9
     max: 0.99
     distribution: uniform
 
   gamma:
-    min: 0.95         # around your default 0.999
+    min: 0.95         # around default 0.999
     max: 0.999
     distribution: uniform
