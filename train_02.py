@@ -7,7 +7,6 @@ from init import xavier_normal, xavier_uniform, he_normal, he_uniform
 from Data_loading import FASHION_MNIST, cifar10, train_val_split
 from Loss import cross_entropy_batch
 
-
 # ---- maps for sweep ----
 INIT_FNS = {
     "he_normal": he_normal,
@@ -22,12 +21,12 @@ ACT_FNS = {
 }
 
 
-
 def to_one_hot(y, num_classes=10):
     # returns (num_classes, batch_size)
     oh = np.zeros((num_classes, y.size))
     oh[y, np.arange(y.size)] = 1.0
     return oh
+
 
 def accuracy(logits, y_true):
     preds = np.argmax(logits, axis=0)
@@ -45,12 +44,16 @@ def main():
         "activation": "Relu",
         "init": "xavier_uniform",
         "dataset": "Fashion-MNIST",
+        # Adam hyperparameters (you can sweep these too if you want)
+        "beta": 0.9,
+        "gamma": 0.999,
     }
 
     run = wandb.init(
-        project="deep-learning-hpc",
+        project="DeepLearning",
         config=default_config,
     )
+    
     cfg = wandb.config
 
     # read hyperparams from sweep
@@ -61,6 +64,8 @@ def main():
     act_fn       = ACT_FNS[cfg.activation]
     init_fn      = INIT_FNS[cfg.init]
     dataset      = cfg.dataset
+    beta         = float(cfg.beta)
+    gamma        = float(cfg.gamma)
 
     # ---- Load dataset ----
     if dataset == "Fashion-MNIST":
@@ -76,12 +81,11 @@ def main():
     input_size = X_train.shape[0]
     output_size = 10
 
-    # Build model
-    net = FFNN(input_size, hidden_sizes, output_size, init_fn, act_fn)
+    # Build model  <-- now with beta, gamma
+    net = FFNN(input_size, hidden_sizes, output_size, init_fn, act_fn, beta, gamma)
 
     N_train = X_train.shape[1]
 
-    # ---- Training loop ----
     for epoch in range(epochs):
         perm = np.random.permutation(N_train)
         X_train = X_train[:, perm]
@@ -104,12 +108,11 @@ def main():
             num_batches += 1
 
             grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch)
-
             net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
 
         epoch_train_loss /= num_batches
 
-        # ---- Eval ----
+        # ---- Eval on train + val ----
         train_logits, _, _ = net.forward(X_train)
         val_logits, _, _   = net.forward(X_val)
 
@@ -130,9 +133,34 @@ def main():
             "val_acc": float(val_acc),
         })
 
+        print(f"Epoch {epoch+1}/{epochs}  "
+              f"Train acc: {train_acc:.4f}  Val acc: {val_acc:.4f}")
+
+    # ---- Final test evaluation (only once, after training) ----
+    test_logits, _, _ = net.forward(Xte)
+    test_oh = to_one_hot(yte, output_size)
+
+    test_loss = cross_entropy_batch(test_oh, test_logits)
+    test_acc  = accuracy(test_logits, yte)
+
+    wandb.log({
+        "test_loss": float(test_loss),
+        "test_acc": float(test_acc),
+    })
+
+    # optional: mark as summary metrics in W&B
+    wandb.run.summary["test_loss"] = float(test_loss)
+    wandb.run.summary["test_acc"]  = float(test_acc)
+
+    print(f"FINAL TEST  -  loss: {test_loss:.4f}  acc: {test_acc:.4f}")
+
     wandb.finish()
+
+
+    
+
+    
 
 
 if __name__ == "__main__":
     main()
-
