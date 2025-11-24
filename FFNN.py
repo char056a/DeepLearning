@@ -59,7 +59,7 @@ class FFNN:
             output=a
         return output,A,Z
     
-        def full_gradient(self, A, Z, onehot, input):
+    def full_gradient(self, A, Z, onehot, input):
         gradients_w = []
         gradients_b = []
         dLi_dW, dLi_dB = self.layers[-1].gradient_last(onehot, A, Z)
@@ -84,7 +84,6 @@ class FFNN:
 
         return gradients_w, gradients_b
 
-    fo
     def update_wb(self, gradients_w, gradients_b, learning_rate, Adam=False):
         if Adam:
             self.t += 1
