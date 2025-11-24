@@ -125,12 +125,21 @@ def main():
         train_acc = accuracy(train_logits, y_train)
         val_acc   = accuracy(val_logits, y_val)
 
+        test_logits, _, _ = net.forward(Xte)
+        test_oh = to_one_hot(yte, output_size)
+
+        test_loss = cross_entropy_batch(test_oh, test_logits)
+        test_acc  = accuracy(test_logits, yte)
+
         wandb.log({
             "epoch": epoch,
             "train_loss": float(train_loss),
             "val_loss": float(val_loss),
             "train_acc": float(train_acc),
             "val_acc": float(val_acc),
+            "test_loss": float(test_loss),
+            "test_acc": float(test_acc),
+
         })
 
         print(f"Epoch {epoch+1}/{epochs}  "

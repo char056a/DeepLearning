@@ -2,7 +2,7 @@ program: train_02.py
 method: bayes
 
 metric:
-  name: val_acc         # this the key we log
+  name: test_acc    # this the key we log
   goal: maximize
 
 parameters:
@@ -12,20 +12,20 @@ parameters:
     distribution: uniform
 
   batch_size:
-    min: 32
-    max: 128
+    min: 100
+    max: 500
     distribution: int_uniform
 
   epochs:
-    min: 20
+    min: 40
     max: 80
     distribution: int_uniform
 
   hidden_sizes:
   values:
-    - [512, 256]
-    - [512, 512, 256]
-    - [1024, 512, 256]
+    - [512, 250, 412, 430, 230]
+    - [32, 64,125,250,500,250,125,64,32]
+    - [400,300,200,100,200,300,400]
 
 
   activation:
@@ -46,11 +46,11 @@ parameters:
       - Fashion-MNIST
 
   beta:
-    min: 0.8          # around default 0.9
-    max: 0.99
+    min: 0.0          # around default 0.9
+    max: 1.0
     distribution: uniform
 
   gamma:
-    min: 0.95         # around default 0.999
-    max: 0.999
+    min: 0.0         # around default 0.999
+    max: 1.0
     distribution: uniform
