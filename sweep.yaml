@@ -7,8 +7,8 @@ metric:
 
 parameters:
   learning_rate:
-    min: 0.0007
-    max: 0.0015
+    min: 0.005
+    max: 0.01
     distribution: uniform
 
   batch_size:
