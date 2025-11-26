@@ -37,16 +37,16 @@ def main():
 
     # ---- default config (overridden by W&B sweep) ----
     default_config = {
-        "epochs": 25,
-        "learning_rate": 1e-3,
-        "batch_size": 64,
-        "hidden_sizes": [128, 64],
+        "epochs": 60,
+        "learning_rate": 0.0025,
+        "batch_size": 300,
+        "hidden_sizes": [32, 64,125,250,500,250,125,64,32],
         "activation": "Relu",
-        "init": "xavier_uniform",
+        "init": "he_normal",
         "dataset": "Fashion-MNIST",
-        # Adam hyperparameters (you can sweep these too if you want)
+        
         "beta": 0.9,
-        "gamma": 0.999,
+        "gamma": 0.9,
     }
 
     run = wandb.init(
