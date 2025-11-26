@@ -25,29 +25,17 @@ ACT_FNS = {
 # --- helpers ---
 
 def to_one_hot(y, num_classes=10):
-    """
-    y: 1D array of class indices, shape (N,)
-    return: one-hot, shape (num_classes, N)
-    """
     oh = np.zeros((num_classes, y.size))
     oh[y, np.arange(y.size)] = 1.0
     return oh
 
 
 def accuracy(logits, y_true):
-    """
-    logits: (num_classes, N)
-    y_true: (N,) class indices
-    """
     preds = np.argmax(logits, axis=0)
     return np.mean(preds == y_true)
 
 
 def confusion_matrix_indices(y_true, logits, num_classes):
-    """
-    y_true: (N,) class indices
-    logits: (num_classes, N)
-    """
     preds = np.argmax(logits, axis=0)
 
     cm = np.zeros((num_classes, num_classes), dtype=int)
@@ -107,20 +95,12 @@ def main():
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
 
-    # Xtr: (D, N_total)
-    # ytr: (N_total,)
-
-    # train / val split (feature-first X, sample-first y)
     X_train, y_train, X_val, y_val = train_val_split(Xtr, ytr, val_size=5000, seed=42)
 
-    # ---- dims ----
-    # X_* : (D, N)
-    # y_* : (N,)
     input_size  = X_train.shape[0]   # D
     N_train     = X_train.shape[1]   # N_train
     output_size = 10                 # 10 klasser
 
-    # ---- byg model med init/activation fra sweep ----
     net = FFNN(
         input_size=input_size,
         hidden_sizes=hidden_sizes,
@@ -131,9 +111,7 @@ def main():
         gamma=gamma,
     )
 
-    # ---- træningsloop ----
     for epoch in range(epochs):
-        # shuffle langs sample-aksen
         perm = np.random.permutation(N_train)
         X_train = X_train[:, perm]   # (D, N_train)
         y_train = y_train[perm]      # (N_train,)
@@ -151,13 +129,10 @@ def main():
             y_batch = y_train[start:end]      # (bs,)
             bs = end - start
 
-            # One-hot til loss
             y_batch_oh = to_one_hot(y_batch, output_size)  # (C, bs)
 
-            # Forward
             logits_batch, A_batch, Z_batch = net.forward(X_batch)  # logits: (C, bs)
 
-            # Loss + accuracy
             batch_loss = cross_entropy_batch(y_batch_oh, logits_batch)
             batch_acc  = accuracy(logits_batch, y_batch)
 
@@ -165,7 +140,6 @@ def main():
             epoch_correct_sum += batch_acc * bs
             epoch_samples    += bs
 
-            # Backprop
             grads_w, grads_b = net.full_gradient(
                 A_batch,
                 Z_batch,
@@ -173,7 +147,6 @@ def main():
                 X_batch
             )
 
-            # Adam-opdatering via din FFNN-metode
             net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
 
             # L2-normer af parametre og grads (sidste batch)
@@ -187,7 +160,6 @@ def main():
                 sq_sum_grads += np.sum(dW**2) + np.sum(dB**2)
             last_grad_norm = np.sqrt(sq_sum_grads)
 
-        # ---- epoch-metrics (train) ----
         train_loss = epoch_loss_sum / epoch_samples
         train_acc  = epoch_correct_sum / epoch_samples
 
@@ -203,7 +175,6 @@ def main():
             f"val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}"
         )
 
-        # ---- log train + val til W&B ----
         wandb.log({
             "epoch": epoch,
             "train_loss": float(train_loss),
@@ -216,20 +187,17 @@ def main():
             "grad_l2_norm": float(last_grad_norm) if last_grad_norm is not None else None,
         })
 
-    # ---- FINAL TEST EVALUATION (kun én gang) ----
     test_logits, _, _ = net.forward(Xte)           # Xte: (D, N_test)
     test_oh   = to_one_hot(yte, output_size)      # (C, N_test)
     test_loss = cross_entropy_batch(test_oh, test_logits)
     test_acc  = accuracy(test_logits, yte)
 
-    # Confusion matrix på test
     cm, y_true_labels, y_pred_labels = confusion_matrix_indices(
         yte, test_logits, num_classes=output_size
     )
 
     print(f"\nFINAL TEST  -  loss: {test_loss:.4f}, acc: {test_acc:.4f}")
 
-    # Log test-resultat og confusion matrix til W&B
     wandb.log({
         "final_test_loss": float(test_loss),
         "final_test_acc": float(test_acc),
@@ -240,7 +208,6 @@ def main():
         ),
     })
 
-    # Læg test i summary så du kan se det i sweeps-tabellen
     wandb.run.summary["final_test_loss"] = float(test_loss)
     wandb.run.summary["final_test_acc"]  = float(test_acc)
 
