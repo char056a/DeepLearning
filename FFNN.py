@@ -44,7 +44,7 @@ class FFNN:
         self.t = 0
         self.beta =beta
         self.gamma = gamma
-        self.lambda_ = 0
+        self.lambda_ = lambda_
 
     def forward(self,input):
 
@@ -76,10 +76,10 @@ class FFNN:
         dLi_dW=np.einsum('ij,sj->jis',dLi_df,input)# instead of dLi_dW=np.outer(dLi_df,input)
         gradients_w.insert(0,np.sum(dLi_dW,axis=0))
         gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        if Adam==False:
-            for layer, gw in zip(self.layers, gradients_w):
-                gw += 2 * lambda_ * layer.weights
-        gradients_w = gw
+        if Adam == False:
+            for i, layer in enumerate(self.layers):
+                gradients_w[i] = gradients_w[i] + 2 * lambda_ * layer.weights
+
         return gradients_w,gradients_b
     
     def update_wb(self,gradients_w,gradients_b,learning_rate, Adam=False):
@@ -104,4 +104,5 @@ class FFNN:
             for layer,weights,biases in zip(self.layers,gradients_w,gradients_b):
                 layer.weights -= learning_rate * weights
                 layer.bias -= learning_rate * biases
+    
             
