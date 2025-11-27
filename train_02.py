@@ -32,6 +32,8 @@ def accuracy(logits, y_true):
     preds = np.argmax(logits, axis=0)
     return np.mean(preds == y_true)
 
+Adam_=True
+lambda_=0.5
 
 def main():
 
@@ -102,13 +104,20 @@ def main():
             y_batch_oh = to_one_hot(y_batch, output_size)
 
             logits, A, Z = net.forward(X_batch)
-            loss = cross_entropy_batch(y_batch_oh, logits)
+
+            if Adam_:
+                loss = cross_entropy_batch(y_batch_oh, logits)
+            else:
+                w_summed2 = 0
+                for layer in net.layers:
+                    w_summed2 += np.sum(layer.weights **2)
+                loss = cross_entropy_batch(y_batch_oh, logits) + lambda_ * w_summed2
 
             epoch_train_loss += loss
             num_batches += 1
 
-            grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch)
-            net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
+            grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch,lambda_,Adam =Adam_)
+            net.update_wb(grads_w, grads_b, learning_rate=lr, Adam = Adam_)
 
         epoch_train_loss /= num_batches
 
@@ -119,8 +128,22 @@ def main():
         train_oh = to_one_hot(y_train, output_size)
         val_oh   = to_one_hot(y_val,   output_size)
 
-        train_loss = cross_entropy_batch(train_oh, train_logits)
-        val_loss   = cross_entropy_batch(val_oh,   val_logits)
+        if Adam_:
+                train_loss = cross_entropy_batch(train_oh, train_logits)
+        else:
+            w_summed2 = 0
+            for layer in net.layers:
+                w_summed2 += np.sum(layer.weights **2)
+            train_loss = cross_entropy_batch(train_oh, train_logits) + lambda_ * w_summed2
+        
+        if Adam_:
+                val_loss  = cross_entropy_batch(val_oh,   val_logits)
+        else:
+            w_summed2 = 0
+            for layer in net.layers:
+                w_summed2 += np.sum(layer.weights **2)
+            val_loss   = cross_entropy_batch(val_oh,   val_logits) + lambda_ * w_summed2
+
 
         train_acc = accuracy(train_logits, y_train)
         val_acc   = accuracy(val_logits, y_val)
@@ -128,7 +151,15 @@ def main():
         test_logits, _, _ = net.forward(Xte)
         test_oh = to_one_hot(yte, output_size)
 
-        test_loss = cross_entropy_batch(test_oh, test_logits)
+        if Adam_:
+                test_loss = cross_entropy_batch(test_oh, test_logits)
+        else:
+            w_summed2 = 0
+            for layer in net.layers:
+                w_summed2 += np.sum(layer.weights **2)
+            test_loss = cross_entropy_batch(test_oh, test_logits) + lambda_ * w_summed2
+       
+
         test_acc  = accuracy(test_logits, yte)
 
         wandb.log({
