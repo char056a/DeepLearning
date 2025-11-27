@@ -33,7 +33,6 @@ def accuracy(logits, y_true):
     return np.mean(preds == y_true)
 
 Adam_=True
-lambda_=0.5
 
 def main():
 
@@ -46,7 +45,7 @@ def main():
         "activation": "Relu",
         "init": "he_normal",
         "dataset": "Fashion-MNIST",
-        
+        "lambda_": 0.5,
         "beta": 0.9,
         "gamma": 0.9,
     }
@@ -68,6 +67,7 @@ def main():
     dataset      = cfg.dataset
     beta         = float(cfg.beta)
     gamma        = float(cfg.gamma)
+    lambda_      = float(cfg.lambda_)
 
     # ---- Load dataset ----
     if dataset == "Fashion-MNIST":
