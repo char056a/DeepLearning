@@ -29,16 +29,16 @@ def cross_entropy_batch(correct_onehot, network_output):
     return np.mean(S) # mean over the whole batch
 
 # Test
-print("MSE:")
-print(MSE(output = np.array([2,3]), target = np.array([4,6])))
-print("Softmax:")
-print(softmax(np.array([1,2,20,3,4])))
-print("Cross:")
-print(cross_entropy_single(np.array([0,0,1,0,0]),[1,2,20,3,4]))
-print("Softmax_matrix: small numbers")
-print(softmax_matrix(np.array([1, 2, 3]))) 
-print("Softmax_matrix: large numbers") 
-print(softmax_matrix(np.array([1000, 1001, 999]))) 
+#print("MSE:")
+#print(MSE(output = np.array([2,3]), target = np.array([4,6])))
+#print("Softmax:")
+#print(softmax(np.array([1,2,20,3,4])))
+#print("Cross:")
+#print(cross_entropy_single(np.array([0,0,1,0,0]),[1,2,20,3,4]))
+#print("Softmax_matrix: small numbers")
+#print(softmax_matrix(np.array([1, 2, 3]))) 
+#print("Softmax_matrix: large numbers") 
+#print(softmax_matrix(np.array([1000, 1001, 999]))) 
 
 
 

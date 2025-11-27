@@ -1,0 +1,60 @@
+project: final_sweep
+program: train_final.py
+method: bayes
+
+metric:
+  name: val_accuracy
+  goal: maximize
+
+parameters:
+  learning_rate:
+    min: 0.0001
+    max: 0.005
+    distribution: uniform
+
+  batch_size:
+    min: 100
+    max: 500
+    distribution: int_uniform
+
+  epochs:
+    min: 40
+    max: 80
+    distribution: int_uniform
+
+  hidden_sizes:
+    values:
+      - [512, 250, 412, 430, 230]
+      - [32, 64, 125, 250, 500, 250, 125, 64, 32]
+      - [400, 300, 200, 100, 200, 300, 400]
+
+  activation:
+    values:
+      - Relu
+      - tanh
+
+  init:
+    values:
+      - he_normal
+      - he_uniform
+      - xavier_normal
+      - xavier_uniform
+
+  dataset:
+    value: Fashion-MNIST
+
+  optimizer:
+    value: Adam
+
+  beta:
+    min: 0.0
+    max: 1.0
+    distribution: uniform
+
+  gamma:
+    min: 0.0
+    max: 1.0
+    distribution: uniform
+
+  lambda_:
+    value: 0.5   # bruges ikke i Adam, men skal være der til scriptet

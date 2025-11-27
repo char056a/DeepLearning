@@ -1,0 +1,27 @@
+#!/bin/bash
+#BSUB -q hpc
+#BSUB -J hp40neuc
+#BSUB -n 5                               # 5 CPU cores total
+#BSUB -R "span[hosts=1] rusage[mem=8000]"   # 8 GB per core -> 40 GB total
+#BSUB -W 24:00
+#BSUB -o sweep_%J.out
+
+cd /dtu/blackhole/07/180519/DeepLearning
+
+echo "Working directory: $(pwd)"
+which python
+python -c "import wandb; print('wandb import OK inside job')"
+
+SWEEP_PATH="s224483-danmarks-tekniske-universitet-dtu/DeepLearning/hp40neuc"
+
+N_AGENTS=5          # 5 parallel agents (one per core)
+COUNT_PER_AGENT=15  # ≈ 22.5h worth of runs per core -> ~75 runs total
+
+for i in $(seq 1 $N_AGENTS); do
+  echo "Starting agent $i..."
+  OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+    python -m wandb agent --count "$COUNT_PER_AGENT" "$SWEEP_PATH" &
+done
+
+wait
+echo "All agents finished."
