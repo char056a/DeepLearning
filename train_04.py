@@ -34,6 +34,7 @@ def accuracy(logits, y_true):
     preds = np.argmax(logits, axis=0)
     return np.mean(preds == y_true)
 
+Adam_=True   # sætte til true eller false
 
 def confusion_matrix_indices(y_true, logits, num_classes):
     preds = np.argmax(logits, axis=0)
@@ -60,6 +61,7 @@ def main():
         # Adam-hyperparametre til din FFNN-optimizer
         "beta": 0.9,
         "gamma": 0.9,
+        "lambda_":0.5
     }
 
     run = wandb.init(
@@ -78,6 +80,7 @@ def main():
     dataset      = cfg.dataset
     beta         = float(cfg.beta)
     gamma        = float(cfg.gamma)
+    lambda_        = float(cfg.lambda_)
 
     # ---- data load: one_hot=False (nemmest) ----
     if dataset == "Fashion-MNIST":
@@ -109,6 +112,7 @@ def main():
         act_fn=act_fn,
         beta=beta,
         gamma=gamma,
+        lambda_=lambda_
     )
 
     for epoch in range(epochs):
@@ -133,7 +137,16 @@ def main():
 
             logits_batch, A_batch, Z_batch = net.forward(X_batch)  # logits: (C, bs)
 
-            batch_loss = cross_entropy_batch(y_batch_oh, logits_batch)
+            
+            if Adam_:
+                batch_loss = cross_entropy_batch(y_batch_oh, logits_batch)
+            else:
+                w_summed2 = 0
+                for layer in net.layers:
+                    w_summed2 += np.sum(layer.weights **2)
+                batch_loss = cross_entropy_batch(y_batch_oh, logits_batch) + lambda_ * w_summed2
+
+
             batch_acc  = accuracy(logits_batch, y_batch)
 
             epoch_loss_sum   += batch_loss * bs
@@ -144,10 +157,12 @@ def main():
                 A_batch,
                 Z_batch,
                 y_batch_oh,
-                X_batch
+                X_batch,
+                lambda_=lambda_,
+                Adam=Adam_
             )
 
-            net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
+            net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=Adam_)
 
             # L2-normer af parametre og grads (sidste batch)
             sq_sum_params = 0.0
@@ -166,7 +181,14 @@ def main():
         # ---- eval på val ----
         val_logits, _, _ = net.forward(X_val)          # X_val: (D, N_val)
         val_oh = to_one_hot(y_val, output_size)        # (C, N_val)
-        val_loss = cross_entropy_batch(val_oh, val_logits)
+    
+        if Adam_:
+                val_loss = cross_entropy_batch(val_oh, val_logits)
+        else:
+            w_summed2 = 0
+            for layer in net.layers:
+                w_summed2 += np.sum(layer.weights **2)
+            val_loss = cross_entropy_batch(val_oh, val_logits)+ lambda_ * w_summed2
         val_acc  = accuracy(val_logits, y_val)
 
         print(
@@ -189,7 +211,15 @@ def main():
 
     test_logits, _, _ = net.forward(Xte)           # Xte: (D, N_test)
     test_oh   = to_one_hot(yte, output_size)      # (C, N_test)
-    test_loss = cross_entropy_batch(test_oh, test_logits)
+
+    if Adam_:
+        test_loss = cross_entropy_batch(test_oh, test_logits)
+    else:
+        w_summed2 = 0
+        for layer in net.layers:
+            w_summed2 += np.sum(layer.weights **2)
+        test_loss = cross_entropy_batch(test_oh, test_logits) + lambda_ * w_summed2
+
     test_acc  = accuracy(test_logits, yte)
 
     cm, y_true_labels, y_pred_labels = confusion_matrix_indices(

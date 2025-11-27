@@ -87,10 +87,10 @@ class FFNN:
             self.t +=1
             t = self.t
             for layer, weights, biases in zip(self.layers, gradients_w, gradients_b):
-                layer.weight_m = self.beta * layer.weight_m + (1-self.beta) * weights
-                layer.weitgh_v = self.gamma * layer.weight_v + (1-self.gamma) * (weights)**2
-                m_tilde_w = layer.weight_m/(1-self.beta**t)
-                v_tilde_w = layer.weight_v/(1-self.gamma**t)
+                layer.weights_m = self.beta * layer.weights_m + (1-self.beta) * weights
+                layer.weights_v = self.gamma * layer.weights_v + (1-self.gamma) * (weights)**2
+                m_tilde_w = layer.weights_m/(1-self.beta**t)
+                v_tilde_w = layer.weights_v/(1-self.gamma**t)
 
                 layer.weights -= learning_rate * m_tilde_w/(np.sqrt(v_tilde_w)+10**(-7))
 
