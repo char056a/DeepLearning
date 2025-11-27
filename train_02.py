@@ -180,7 +180,14 @@ def main():
     test_logits, _, _ = net.forward(Xte)
     test_oh = to_one_hot(yte, output_size)
 
-    test_loss = cross_entropy_batch(test_oh, test_logits)
+    if Adam_:
+        test_loss = cross_entropy_batch(test_oh, test_logits)
+    else:
+        w_summed2 = 0
+        for layer in net.layers:
+            w_summed2 += np.sum(layer.weights **2)
+        test_loss = cross_entropy_batch(test_oh, test_logits) + lambda_ * w_summed2
+
     test_acc  = accuracy(test_logits, yte)
 
     wandb.log({
