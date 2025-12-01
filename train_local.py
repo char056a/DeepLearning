@@ -7,7 +7,6 @@ from Data_loading import FASHION_MNIST, cifar10, train_val_split
 from Loss import cross_entropy_batch
 
 
-print("1111111111111111111111")
 # ---- maps for sweep ----
 INIT_FNS = {
     "he_normal": he_normal,
@@ -36,7 +35,7 @@ def accuracy(logits, y_true):
 
 dataset="Fashion-MNIST"
 
-hidden_sizes=[32,64,128,256,512,256,128,64,32]
+hidden_sizes=[512,256]
 
 init_fn=xavier_normal
 
@@ -49,15 +48,13 @@ gamma=0.5
 
 epochs = 3
 
-batch_size = 512
+batch_size = 400
 
-lr = 0.00
+lr = 0.01
 
-print("2222222222222222222222222")
 
 def main():
 
-    print("3333333333333333")
 
     # ---- Load dataset ----
     if dataset == "Fashion-MNIST":
@@ -67,7 +64,6 @@ def main():
     else:
         raise ValueError("Unknown dataset")
     
-    print("4444444444444444444444")
 
     X_train, y_train, X_val, y_val = train_val_split(Xtr, ytr, val_size=5000, seed=42)
 
@@ -75,18 +71,18 @@ def main():
     input_size = X_train.shape[0]
     output_size = 10
 
-    print("5555555555555555555")
+
 
     # Build model  <-- now with beta, gamma
-    net = FFNN(input_size, hidden_sizes, output_size, init_fn, act_fn, beta, gamma)
+    net = FFNN(input_size, hidden_sizes, output_size, init_fn, act_fn, beta, gamma,lambda_=0.0001)
 
     N_train = X_train.shape[1]
 
-    print("666666666666666666666")
 
     for epoch in range(epochs):
 
-        print("7777777777777777777777")
+        print(f"epoch number {epoch}")
+
         perm = np.random.permutation(N_train)
         X_train = X_train[:, perm]
         y_train = y_train[perm]
@@ -107,7 +103,7 @@ def main():
             epoch_train_loss += loss
             num_batches += 1
 
-            grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch)
+            grads_w, grads_b = net.full_gradient(A, Z, y_batch_oh, X_batch,lambda_=0.0001)
             net.update_wb(grads_w, grads_b, learning_rate=lr, Adam=True)
 
         epoch_train_loss /= num_batches
