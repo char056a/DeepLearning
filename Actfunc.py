@@ -9,13 +9,6 @@ def Relu(x,derivative=False):
     else:
         return (np.abs(x)+x)/2
 
-def sigmoid(x,derivative=False):
-
-    if derivative:
-        return np.exp(-x)/(1+2*np.exp(-x)+np.exp(-2*x))
-    else:
-        return 1/(1+np.exp(-x))
-
 def tanh(x,derivative = False):
 
     if derivative: 
