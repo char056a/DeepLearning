@@ -28,7 +28,7 @@ class Layer:
     def gradient_last(self,onehot,A,Z):
         S=softmax_matrix(Z[-1])
         delta=S-onehot
-        d_WL=np.einsum('ij,sj->jis',delta,A[-2]) # i stedet for d_WL=np.outer(delta,A[-2])
+        d_WL=np.einsum('ij,sj->jis',delta,A[-2]) 
         d_BL=delta
         return d_WL, d_BL
 
@@ -66,14 +66,14 @@ class FFNN:
         gradients_w.insert(0,np.sum(dLi_dW,axis=0))
         gradients_b.insert(0,np.sum(dLi_dB,axis=1))
         for i in range(len(self.layers)-2,0,-1):
-            dLi_df=((self.layers[i+1].weights.T@dLi_df)*(Z[i]>0)) #
+            dLi_df=((self.layers[i+1].weights.T@dLi_df)*(Z[i]>0)) 
             dLi_dB=dLi_df #
-            dLi_dW=np.einsum('ij,sj->jis',dLi_df,A[i-1]) # instead of dLi_dW=np.outer(dLi_df,A[i-1])
+            dLi_dW=np.einsum('ij,sj->jis',dLi_df,A[i-1]) 
             gradients_w.insert(0,np.sum(dLi_dW,axis=0))
             gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        dLi_df=((self.layers[1].weights.T@dLi_df)*(Z[0]>0)) #
+        dLi_df=((self.layers[1].weights.T@dLi_df)*(Z[0]>0)) 
         dLi_dB=dLi_df
-        dLi_dW=np.einsum('ij,sj->jis',dLi_df,input)# instead of dLi_dW=np.outer(dLi_df,input)
+        dLi_dW=np.einsum('ij,sj->jis',dLi_df,input)
         gradients_w.insert(0,np.sum(dLi_dW,axis=0))
         gradients_b.insert(0,np.sum(dLi_dB,axis=1))
         if Adam == False:
