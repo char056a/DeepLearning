@@ -71,7 +71,7 @@ class FFNN:
             dLi_dW=dLi_df@(A[i-1].T) 
             gradients_w.insert(0,dLi_dW)
             gradients_b.insert(0,np.sum(dLi_dB,axis=1))
-        dLi_df=((self.layers[1].weights.T@dLi_df)*(Z[0]>0)) 
+        dLi_df=((self.layers[1].weights.T@dLi_df)*(self.layers[0].act_fn(Z[0]))) 
         dLi_dB=dLi_df
         dLi_dW = dLi_df@(input.T)
         gradients_w.insert(0,dLi_dW)
